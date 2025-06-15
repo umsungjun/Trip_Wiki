@@ -14,8 +14,60 @@ export default function App($app) {
     cities: "",
   };
 
-  const header = new Header();
+  const header = new Header({
+    $app,
+    initialState: {
+      sortBy: this.state.sortBy,
+      searchWord: this.state.searchWord,
+    },
+    handleSortChange: async (sortBy) => {
+      const pageUrl = `/${this.state.region}?sort=${sortBy}`;
+      history.pushState(
+        null,
+        "",
+        this.state.searchWord
+          ? `${pageUrl}&search=${this.state.searchWord}`
+          : pageUrl
+      );
+
+      const cities = await request(
+        0,
+        this.state.region,
+        sortBy,
+        this.state.searchWord
+      );
+
+      this.setState({
+        ...this.state,
+        startIdx: 0,
+        sortBy: sortBy,
+        cities: cities,
+      });
+    },
+    handleSearch: async (searchWord) => {
+      history.pushState(
+        null,
+        "",
+        `/${this.state.region}?sort=${this.state.sortBy}&search=${searchWord}`
+      );
+
+      const cities = await request(
+        0,
+        this.state.region,
+        this.state.sortBy,
+        searchWord
+      );
+      this.setState({
+        ...this.state,
+        startIdx: 0,
+        searchWord: searchWord,
+        cities: cities,
+      });
+    },
+  });
+
   const regionList = new RegionList();
+
   const cityList = new CityList({
     $app,
     initialState: this.state.cities,
@@ -38,11 +90,16 @@ export default function App($app) {
       });
     },
   });
+
   const cityDetail = new CityDetail();
 
   this.setState = (newState) => {
     this.state = newState;
     cityList.setState(this.state.cities);
+    header.setState({
+      sortBy: this.state.sortBy,
+      searchWord: this.state.searchWord,
+    });
   };
 
   const init = async () => {
