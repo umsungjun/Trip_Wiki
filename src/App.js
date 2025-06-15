@@ -6,10 +6,18 @@ import CityDetail from "./components/CityDetail.js";
 import { request } from "./components/api.js";
 
 export default function App($app) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const getSortBy = () => {
+    return urlParams.get("sort") || "total";
+  };
+  const getSearchWord = () => {
+    return urlParams.get("search") || "";
+  };
+
   this.state = {
     startIdx: 0,
-    sortBy: "",
-    searchWord: "",
+    sortBy: getSortBy(),
+    searchWord: getSearchWord(),
     region: "",
     cities: "",
   };
