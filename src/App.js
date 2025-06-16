@@ -125,6 +125,33 @@ export default function App($app) {
     regionList.setState(this.state.region);
   };
 
+  window.addEventListener("popstate", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlPath = window.location.pathname;
+
+    const prevRegion = urlPath.replace("/", "") || "All";
+    const prevSortBy = urlParams.get("sort") || "total";
+    const prevSearchWord = urlParams.get("search") || "";
+
+    const prevCities = await request(0, prevRegion, prevSortBy, prevSearchWord);
+
+    this.setState({
+      ...this.state,
+      startIdx: 0,
+      region: prevRegion,
+      sortBy: prevSortBy,
+      searchWord: prevSearchWord,
+      cities: prevCities,
+    });
+
+    request(0, region, sortBy, searchWord).then((cities) => {
+      this.setState({
+        ...this.state,
+        cities: cities,
+      });
+    });
+  });
+
   const init = async () => {
     const cities = await request(
       this.state.startIdx,
