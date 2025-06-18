@@ -3,7 +3,7 @@ import RegionList from "./components/RegionList.js";
 import CityList from "./components/CityList.js";
 import CityDetail from "./components/CityDetail.js";
 
-import { request } from "./components/api.js";
+import { request, requestCityDetail } from "./components/api.js";
 import { getCurrentPath } from "./util/util.js";
 
 export default function App($app) {
@@ -124,8 +124,13 @@ export default function App($app) {
     });
   };
 
-  const renderCityDetail = () => {
-    new CityDetail();
+  const renderCityDetail = async (cityId) => {
+    try {
+      const cityDetailData = await requestCityDetail(cityId);
+      new CityDetail({ $app, initialState: cityDetailData });
+    } catch (error) {
+      console.log("상세 페이지 렌더링 실패:", error);
+    }
   };
 
   this.setState = (newState) => {
@@ -138,7 +143,8 @@ export default function App($app) {
 
     renderHeader();
     if (getCurrentPath().startsWith("/city/")) {
-      render();
+      const cityId = getCurrentPath().replace("/city/", "");
+      renderCityDetail(cityId);
     } else {
       /* 리스트 페이지 랜더링 */
       renderRegionList();
